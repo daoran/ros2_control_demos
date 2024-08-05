@@ -20,7 +20,6 @@
 #define ROS2_CONTROL_DEMO_EXAMPLE_14__RRBOT_SENSOR_FOR_POSITION_FEEDBACK_HPP_
 
 #include <netinet/in.h>
-#include <sys/socket.h>
 #include <memory>
 #include <string>
 #include <thread>
@@ -35,7 +34,6 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/time.hpp"
 #include "realtime_tools/realtime_buffer.h"
-#include "ros2_control_demo_example_14/visibility_control.h"
 
 namespace ros2_control_demo_example_14
 {
@@ -44,30 +42,23 @@ class RRBotSensorPositionFeedback : public hardware_interface::SensorInterface
 public:
   RCLCPP_SHARED_PTR_DEFINITIONS(RRBotSensorPositionFeedback);
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::CallbackReturn on_init(
     const hardware_interface::HardwareInfo & info) override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::CallbackReturn on_configure(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::CallbackReturn on_activate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::CallbackReturn on_deactivate(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::CallbackReturn on_shutdown(
     const rclcpp_lifecycle::State & previous_state) override;
 
-  ROS2_CONTROL_DEMO_EXAMPLE_14_PUBLIC
   hardware_interface::return_type read(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
 

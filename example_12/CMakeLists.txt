@@ -5,6 +5,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra)
 endif()
 
+# set the same behavior for windows as it is on linux
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 # find dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface
@@ -19,7 +22,16 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   std_msgs
 )
 
+# Specify the required version of ros2_control
+find_package(controller_manager 4.0.0)
+# Handle the case where the required version is not found
+if(NOT controller_manager_FOUND)
+  message(FATAL_ERROR "ros2_control version 4.0.0 or higher is required. "
+  "Are you using the correct branch of the ros2_control_demos repository?")
+endif()
+
 # find dependencies
+find_package(backward_ros REQUIRED)
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
@@ -41,10 +53,6 @@ ament_target_dependencies(
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
 
-# Causes the visibility macros to use dllexport rather than dllimport,
-# which is appropriate when building the dll but not consuming it.
-target_compile_definitions(${PROJECT_NAME} PRIVATE "ROS2_CONTROL_DEMO_EXAMPLE_9_BUILDING_DLL")
-
 # Export hardware plugins
 pluginlib_export_plugin_description_file(hardware_interface ros2_control_demo_example_12.xml)
 
@@ -62,10 +70,6 @@ $<INSTALL_INTERFACE:include/passthrough_controller>
 )
 target_link_libraries(passthrough_controller PUBLIC passthrough_controller_parameters)
 ament_target_dependencies(passthrough_controller PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-# Causes the visibility macros to use dllexport rather than dllimport,
-# which is appropriate when building the dll but not consuming it.
-target_compile_definitions(passthrough_controller PRIVATE "passthrough_controller_BUILDING_DLL")
 
 pluginlib_export_plugin_description_file(controller_interface passthrough_controller.xml)
 
@@ -109,6 +113,7 @@ if(BUILD_TESTING)
 
   ament_add_pytest_test(example_12_urdf_xacro test/test_urdf_xacro.py)
   ament_add_pytest_test(view_example_12_launch test/test_view_robot_launch.py)
+  ament_add_pytest_test(run_example_12_launch test/test_rrbot_launch.py)
 endif()
 
 ## EXPORTS

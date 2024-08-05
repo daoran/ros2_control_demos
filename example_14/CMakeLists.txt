@@ -5,6 +5,9 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "(GNU|Clang)")
   add_compile_options(-Wall -Wextra)
 endif()
 
+# set the same behavior for windows as it is on linux
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 # find dependencies
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface
@@ -14,12 +17,20 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   realtime_tools
 )
 
+# Specify the required version of ros2_control
+find_package(controller_manager 4.0.0)
+# Handle the case where the required version is not found
+if(NOT controller_manager_FOUND)
+  message(FATAL_ERROR "ros2_control version 4.0.0 or higher is required. "
+  "Are you using the correct branch of the ros2_control_demos repository?")
+endif()
+
 # find dependencies
+find_package(backward_ros REQUIRED)
 find_package(ament_cmake REQUIRED)
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
-
 
 ## COMPILE
 add_library(
@@ -37,10 +48,6 @@ ament_target_dependencies(
   ros2_control_demo_example_14 PUBLIC
   ${THIS_PACKAGE_INCLUDE_DEPENDS}
 )
-
-# Causes the visibility macros to use dllexport rather than dllimport,
-# which is appropriate when building the dll but not consuming it.
-target_compile_definitions(${PROJECT_NAME} PRIVATE "ROS2_CONTROL_DEMO_EXAMPLE_14_BUILDING_DLL")
 
 # Export hardware plugins
 pluginlib_export_plugin_description_file(hardware_interface ros2_control_demo_example_14.xml)
@@ -66,7 +73,11 @@ install(TARGETS ros2_control_demo_example_14
 )
 
 if(BUILD_TESTING)
-  find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
+
+  ament_add_pytest_test(example_14_urdf_xacro test/test_urdf_xacro.py)
+  ament_add_pytest_test(view_example_14_launch test/test_view_robot_launch.py)
+  ament_add_pytest_test(run_example_14_launch test/test_rrbot_modular_actuators_without_feedback_sensors_for_position_feedback_launch.py)
 endif()
 
 ## EXPORTS
